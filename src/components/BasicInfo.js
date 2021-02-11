@@ -1,5 +1,4 @@
-import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import React, { useState } from 'react';
 import { Formik, Field, Form, ErrorMessage } from 'formik';
 import * as Yup from 'yup';
 import { Dropdown } from 'primereact/dropdown';
@@ -16,41 +15,19 @@ const basicInfoSchema = Yup.object().shape({
 
 const BasicInfo = ()  => {
     const [getName, setName] = useState("");
-    const [classOptions, setClassOptions] = useState([]);
-    const [raceOptions, setRaceOptions] = useState([]);
-    const [getClass, setClass] = useState("");
-    const [getRace, setRace] = useState("");
-    const [getProficiencies, setProficiencies] = useState([]);
-    const [getLanguages, setLanguages] = useState([]);
-
-    useEffect( () => {
-
-    }, []);
+    const [classOptions] = useState([]);
+    const [raceOptions] = useState([]);
+    const [getClass] = useState("");
+    const [getRace] = useState("");
+    const [proficiencies] = useState([]);
+    const [languages] = useState([]);
 
     const handleSubmit = (e) => {
-
-        console.log(e);
-
         const chosenClass = e.chosenClass.name;
         const chosenRace = e.chosenRace.name;
-        const chosenClassIndex = parseInt(e.chosenClass.url.slice(35));
-        const chosenRaceIndex = parseInt(e.chosenRace.url.slice(33));
-
-        setClass(chosenClass);
-        setRace(chosenRace);
-        getRaceLanguages(chosenRaceIndex);
-        getClassProficiencies(chosenClassIndex);
     }
 
-    function getRaceLanguages(raceIndex) {
-
-    };
-
-    function getClassProficiencies(classIndex) {
-
-    };
-
-    const setCharachterName = e => {
+    const setCharacterName = e => {
         setName(e);
     };
 
@@ -61,7 +38,7 @@ const BasicInfo = ()  => {
                 <Field name="chosenName" render={({field}) =>
                     <span className='p-float-label' style={{ marginTop: '1rem' }}>
                         <InputText id='chosenName' {...field}  value={getName} onChange={e => {
-                            setCharachterName(e.target.value)}} style={{ width: '100%' }}/>
+                            setCharacterName(e.target.value)}} style={{ width: '100%' }}/>
                         <label htmlFor='chosenName'>Enter Name</label>
                     </span>
                 }/>
@@ -75,24 +52,28 @@ const BasicInfo = ()  => {
                 onSubmit={e => handleSubmit(e)}
                 render={() => (
                     <Form>
-                        <Field name="chosenRace" render={({field}) =>
-                        <Dropdown
-                            {...field}
-                            style={{ marginTop: '1rem' }}
-                            optionLabel="name"
-                            options={raceOptions}
-                            placeholder="Select D&D Race"/>}/>
-                        <ErrorMessage name='chosenRace'/>
+                        <div className="dropdownFormContainer">
+                            <Field name="chosenRace" render={({field}) =>
+                            <Dropdown
+                                {...field}
+                                className="dropdownFormElement"
+                                style={{ marginTop: '1rem' }}
+                                optionLabel="name"
+                                options={raceOptions}
+                                placeholder="Select D&D Race"/>}/>
+                            <ErrorMessage name='chosenRace'/>
 
-                        <Field name="chosenClass" render={({field}) =>
-                        <Dropdown
-                            {...field}
-                            style={{ marginTop: '1rem' }}
-                            optionLabel="name"
-                            options={classOptions}
-                            placeholder="Select D&D Class"/>}/>
-                        <ErrorMessage name='chosenClass'/>
-                        <Button label="Select" className="p-button-raised" style={{ marginTop: '1rem' }}/>
+                            <Field name="chosenClass" render={({field}) =>
+                            <Dropdown
+                                {...field}
+                                className="dropdownFormElement"
+                                style={{ marginTop: '1rem' }}
+                                optionLabel="name"
+                                options={classOptions}
+                                placeholder="Select D&D Class"/>}/>
+                            <ErrorMessage name='chosenClass'/>
+                            <Button label="Select" className="dropdownFormElement dropdownFormButton p-button-raised" style={{ marginTop: '1rem' }}/>
+                        </div>
                     </Form>
                 )}
             />
@@ -100,10 +81,10 @@ const BasicInfo = ()  => {
                 <h3 className="NameRaceClass">{getName} {(getName && getRace && getClass) ? "the" : null} {getRace} {getClass}</h3>
             </div>
             <div>
-                {createProficienciesList(getProficiencies)}
+                {createProficienciesList(proficiencies)}
             </div>
             <div>
-                {createLanguagesList(getLanguages)}
+                {createLanguagesList(languages)}
             </div>
         </>
     );
