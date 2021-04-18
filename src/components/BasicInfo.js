@@ -6,6 +6,7 @@ import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { createProficienciesList } from './createProficienciesList';
 import { createLanguagesList } from './createLanguagesList';
+import '../styles/BasicInfo.css';
 
 const basicInfoSchema = Yup.object().shape({
     chosenName: Yup.string().notRequired(),
@@ -15,21 +16,73 @@ const basicInfoSchema = Yup.object().shape({
 
 const BasicInfo = ()  => {
     const [getName, setName] = useState("");
-    const [classOptions] = useState([]);
-    const [raceOptions] = useState([]);
-    const [getClass] = useState("");
-    const [getRace] = useState("");
-    const [proficiencies] = useState([]);
-    const [languages] = useState([]);
+    const [classOptions, setClasses] = useState([]);
+    const [raceOptions, setRaces] = useState([]);
+    const [getClass, setClassDisplay] = useState("");
+    const [getRace, setRaceDisplay] = useState("");
+    const [proficiencies, setProficiencies] = useState([]);
+    const [languages, setLanguages] = useState([]); 
+
+    React.useEffect(function populateState() {
+        Promise.all([
+            fetch('https://www.dnd5eapi.co/api/races'),
+            fetch('https://www.dnd5eapi.co/api/classes')
+        ])
+        .then(([raceRes, classRes]) => {
+            if(!raceRes.ok)
+                return raceRes.json().then(e => Promise.reject(e));
+            if(!classRes.ok)
+                return classRes.json().then(e => Promise.reject(e));
+            return Promise.all([raceRes.json(), classRes.json()]);
+        })
+        .then(([races, classes]) => {
+            setRaces(races.results);
+            setClasses(classes.results)
+        })
+        .catch(error => {
+            console.error({error});
+        });
+    }, []);
 
     const handleSubmit = (e) => {
-        const chosenClass = e.chosenClass.name;
-        const chosenRace = e.chosenRace.name;
-    }
+        const chosenClass = e.chosenClass.index;
+        const chosenRace = e.chosenRace.index;
+
+        Promise.all([
+            fetch(`https://www.dnd5eapi.co/api/races/${chosenRace}`),
+            fetch(`https://www.dnd5eapi.co/api/classes/${chosenClass}`)
+        ])
+        .then(([raceRes, classRes]) => {
+            if(!raceRes.ok)
+                return raceRes.json().then(e => Promise.reject(e));
+            if(!classRes.ok)
+                return classRes.json().then(e => Promise.reject(e));
+            return Promise.all([raceRes.json(), classRes.json()]);
+        })
+        .then(([races, classes]) => {
+            const languages = races.languages.map(lang => lang.name);
+            const profs = classes.proficiencies.map(pro => pro.name);
+            setLanguages(languages);
+            setProficiencies(profs);
+            displayRace(e.chosenRace.name);
+            displayClass(e.chosenClass.name);
+        })
+        .catch(error => {
+            console.error({error}); 
+        });
+    };
 
     const setCharacterName = e => {
         setName(e);
+    }; 
+
+    const displayRace = e => {
+        setRaceDisplay(e);
     };
+
+    const displayClass = e => {
+        setClassDisplay(e);
+    }
 
     return(
         <>
@@ -56,7 +109,7 @@ const BasicInfo = ()  => {
                             <Field name="chosenRace" render={({field}) =>
                             <Dropdown
                                 {...field}
-                                className="dropdownFormElement"
+                                className="dropdownFormElement dropdownFormOptions"
                                 style={{ marginTop: '1rem' }}
                                 optionLabel="name"
                                 options={raceOptions}
@@ -66,7 +119,7 @@ const BasicInfo = ()  => {
                             <Field name="chosenClass" render={({field}) =>
                             <Dropdown
                                 {...field}
-                                className="dropdownFormElement"
+                                className="dropdownFormElement dropdownFormOptions"
                                 style={{ marginTop: '1rem' }}
                                 optionLabel="name"
                                 options={classOptions}
@@ -77,7 +130,7 @@ const BasicInfo = ()  => {
                     </Form>
                 )}
             />
-            <div>
+            <div> 
                 <h3 className="NameRaceClass">{getName} {(getName && getRace && getClass) ? "the" : null} {getRace} {getClass}</h3>
             </div>
             <div>

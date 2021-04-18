@@ -1,0 +1,14 @@
+.dropdownFormOptions {
+    width: 50%;
+}
+
+.dropdownFormButton {
+    width: 100%;
+}
+
+/* I'm not sure what style changes we're looking for at this break, so I just asjusted the text color to signify a change */
+@media (min-width: 600px) {
+    .NameRaceClass {
+        color: green;
+    }
+}
